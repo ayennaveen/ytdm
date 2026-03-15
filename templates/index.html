@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamFetch - Max Quality Video Downloader</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="particles" id="particles-js"></div>
+    
+    <main class="container">
+        <div class="glass-card main-panel">
+            <header>
+                <div class="logo">
+                    <i class="fa-solid fa-cloud-arrow-down gradient-text"></i>
+                    <h1 class="gradient-text">StreamFetch</h1>
+                </div>
+                <p class="subtitle">Download highest quality video merged with HD audio using FFmpeg</p>
+            </header>
+
+            <!-- URL Input Section -->
+            <section class="input-section" id="step-1">
+                <div class="search-box">
+                    <i class="fa-brands fa-youtube search-icon"></i>
+                    <input type="url" id="video-url" placeholder="Paste YouTube link here..." autocomplete="off">
+                    <button id="fetch-btn" class="primary-btn">
+                        <span>Fetch</span>
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </button>
+                    <!-- Loading state -->
+                    <div id="fetch-loader" class="loader-container hidden">
+                        <div class="spinner"></div>
+                        <span>Analyzing metadata...</span>
+                    </div>
+                </div>
+                <div id="error-message" class="error-msg hidden">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>Invalid URL or error fetching.</span>
+                </div>
+            </section>
+
+            <!-- Video Info Section (Hidden initially) -->
+            <section class="info-section hidden" id="step-2">
+                <button id="back-btn" class="icon-btn" title="Back to Search">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                
+                <div class="video-preview">
+                    <div class="thumbnail-container">
+                       <img id="video-thumb" src="" alt="Video Thumbnail">
+                       <span class="duration-badge" id="video-duration">00:00</span>
+                    </div>
+                    <div class="video-details">
+                        <h2 id="video-title" class="truncate-2-lines">Video Title</h2>
+                        <div class="channel-info">
+                            <i class="fa-regular fa-circle-user"></i>
+                            <span id="video-channel">Channel Name</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="download-options">
+                    <h3>Select Format (FFmpeg will merge Max Audio)</h3>
+                    
+                    <div class="format-list" id="format-list">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div class="download-actions">
+                        <button id="download-video-btn" class="action-btn video-dl" disabled>
+                            <i class="fa-solid fa-video"></i> Download Video
+                        </button>
+                        <button id="download-audio-btn" class="action-btn audio-dl">
+                            <i class="fa-solid fa-music"></i> Audio Only (MP3)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Download Progress -->
+                <div id="download-progress" class="progress-section hidden">
+                    <div class="progress-info">
+                        <span class="status-text">Downloading & Processing via FFmpeg...</span>
+                        <span class="percentage">Please Wait</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar infinite-loading"></div>
+                    </div>
+                    <p class="small-note text-warning"><i class="fa-solid fa-triangle-exclamation"></i> Wait for download to finish before closing page.</p>
+                </div>
+                
+                <!-- Success State -->
+                <div id="download-success" class="success-section hidden">
+                    <div class="success-icon">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h4>Download Complete!</h4>
+                    <p>Check your backend <code>/downloads</code> folder.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Particles.js for background animation -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
