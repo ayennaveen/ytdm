@@ -13,6 +13,15 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 # Store active downloads
 active_downloads = {}
 
+# Common yt-dlp options for better bot bypass
+COMMON_OPTS = {
+    'cookiefile': 'cookies.txt',
+    'impersonate': 'chrome',
+    'nocheckcertificate': True,
+    'quiet': True,
+    'no_warnings': True,
+}
+
 @app.route('/')
 def serve_index():
     return send_from_directory('templates', 'index.html')
@@ -30,9 +39,8 @@ def get_video_info():
         return jsonify({'error': 'URL is required'}), 400
         
     ydl_opts = {
-        'cookiefile': 'cookies.txt', # useful placeholder for future updates
+        **COMMON_OPTS,
         'noplaylist': True,
-        'quiet': True
     }
     
     try:
@@ -123,9 +131,9 @@ def download_video_thread(url, format_id, audio_only, download_id):
 
         if audio_only:
             ydl_opts = {
+                **COMMON_OPTS,
                 'format': 'bestaudio/best',
                 'outtmpl': os.path.join(DOWNLOAD_DIR, '%(title)s.%(ext)s'),
-                'cookiefile': 'cookies.txt',
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
@@ -135,9 +143,9 @@ def download_video_thread(url, format_id, audio_only, download_id):
             }
         else:
             ydl_opts = {
+                **COMMON_OPTS,
                 'format': f'{format_id}+bestaudio[ext=m4a]/bestvideo+bestaudio/best' if format_id else 'bestvideo+bestaudio/best',
                 'outtmpl': os.path.join(DOWNLOAD_DIR, '%(title)s.%(ext)s'),
-                'cookiefile': 'cookies.txt',
                 'merge_output_format': 'mp4',
                 'progress_hooks': [my_hook]
             }
