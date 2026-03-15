@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMsg.classList.add('hidden');
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/api/info', {
+            const res = await fetch('/api/info', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url })
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         percentageText.textContent = "0%";
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/api/download', {
+            const res = await fetch('/api/download', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Start polling progress
             const pollInterval = setInterval(async () => {
                 try {
-                    const progRes = await fetch(`http://127.0.0.1:8000/api/progress/${downloadId}`);
+                    const progRes = await fetch(`/api/progress/${downloadId}`);
                     const progData = await progRes.json();
                     
                     if (progRes.ok) {
