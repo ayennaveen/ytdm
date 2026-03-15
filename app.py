@@ -122,9 +122,10 @@ def download_video_thread(url, format_id, audio_only, download_id):
                 }
 
         if audio_only:
-             ydl_opts = {
+            ydl_opts = {
                 'format': 'bestaudio/best',
                 'outtmpl': os.path.join(DOWNLOAD_DIR, '%(title)s.%(ext)s'),
+                'cookiefile': 'cookies.txt',
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
@@ -136,6 +137,7 @@ def download_video_thread(url, format_id, audio_only, download_id):
             ydl_opts = {
                 'format': f'{format_id}+bestaudio[ext=m4a]/bestvideo+bestaudio/best' if format_id else 'bestvideo+bestaudio/best',
                 'outtmpl': os.path.join(DOWNLOAD_DIR, '%(title)s.%(ext)s'),
+                'cookiefile': 'cookies.txt',
                 'merge_output_format': 'mp4',
                 'progress_hooks': [my_hook]
             }
