@@ -69,11 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = urlInput.value.trim();
         if (!url) return;
 
-        // UI State
-        fetchBtn.classList.add('hidden');
-        loader.classList.remove('hidden');
-        errorMsg.classList.add('hidden');
-
         try {
             const res = await fetch('/api/info', {
                 method: 'POST',
@@ -81,9 +76,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ url })
             });
 
+            if (!res.ok) {
+                const errorText = await res.text();
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    throw new Error(errorJson.error || "Server error");
+                } catch (e) {
+                    throw new Error(`Server Error (${res.status}): ${errorText.substring(0, 50)}...`);
+                }
+            }
+
             const data = await res.json();
-            
-            if (!res.ok) throw new Error(data.error || "Failed to fetch");
 
             currentVideoData = data;
             

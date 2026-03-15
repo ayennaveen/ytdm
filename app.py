@@ -44,67 +44,67 @@ def get_video_info():
     }
     
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # extract_info with download=False just fetches metadata
-            info = ydl.extract_info(url, download=False)
-    except Exception as e:
-        # If impersonation fails, try without it
-        if "Impersonate target" in str(e):
-            print("Impersonation failed, falling back to basic headers")
-            ydl_opts.pop('impersonate', None)
+        try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                # extract_info with download=False just fetches metadata
                 info = ydl.extract_info(url, download=False)
-        else:
-            raise e
-    
-    try:
+        except Exception as e:
+            # If impersonation fails, try without it
+            if "Impersonate target" in str(e):
+                print("Impersonation failed, falling back to basic headers")
+                ydl_opts.pop('impersonate', None)
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info = ydl.extract_info(url, download=False)
+            else:
+                raise e
+
         # Filter and organize formats (we want video with audio or ability to merge)
-            formats = []
-            
-            # Basic formats that already have both video and audio
-            for f in info.get('formats', []):
-                # Look for formats that have both video and audio (progressive) or are high quality video to be merged later
-                if f.get('vcodec') != 'none' and f.get('ext') in ['mp4', 'webm']:
-                    height = f.get('height', 0)
-                    fps = f.get('fps', '')
-                    
-                    if height:
-                        format_name = f"{height}p"
-                        if fps and fps > 30:
-                            format_name += f"{fps}"
-                            
-                        formats.append({
-                            'id': f.get('format_id'),
-                            'ext': f.get('ext'),
-                            'resolution': format_name,
-                            'filesize': f.get('filesize') or f.get('filesize_approx', 0),
-                            'vcodec': f.get('vcodec'),
-                            'acodec': f.get('acodec'),
-                            'has_audio': f.get('acodec') != 'none'
-                        })
-            
-            # Deduplicate by resolution, keeping highest quality/best codec combination
-            unique_formats = {}
-            for f in formats:
-                res = f['resolution']
-                # If we haven't seen this resolution, or if this new one has audio while the old one didn't
-                if res not in unique_formats:
-                    unique_formats[res] = f
-                elif f['has_audio'] and not unique_formats[res]['has_audio']:
-                    unique_formats[res] = f
-            
-            # Sort formats by resolution (descending)
-            sorted_formats = sorted(unique_formats.values(), 
-                                  key=lambda x: int(str(x['resolution']).split('p')[0]) if 'p' in str(x['resolution']) else 0, 
-                                  reverse=True)
-            
-            return jsonify({
-                'title': info.get('title'),
-                'thumbnail': info.get('thumbnail'),
-                'duration': info.get('duration'),
-                'channel': info.get('uploader'),
-                'formats': sorted_formats
-            })
+        formats = []
+        
+        # Basic formats that already have both video and audio
+        for f in info.get('formats', []):
+            # Look for formats that have both video and audio (progressive) or are high quality video to be merged later
+            if f.get('vcodec') != 'none' and f.get('ext') in ['mp4', 'webm']:
+                height = f.get('height', 0)
+                fps = f.get('fps', '')
+                
+                if height:
+                    format_name = f"{height}p"
+                    if fps and fps > 30:
+                        format_name += f"{fps}"
+                        
+                    formats.append({
+                        'id': f.get('format_id'),
+                        'ext': f.get('ext'),
+                        'resolution': format_name,
+                        'filesize': f.get('filesize') or f.get('filesize_approx', 0),
+                        'vcodec': f.get('vcodec'),
+                        'acodec': f.get('acodec'),
+                        'has_audio': f.get('acodec') != 'none'
+                    })
+        
+        # Deduplicate by resolution, keeping highest quality/best codec combination
+        unique_formats = {}
+        for f in formats:
+            res = f['resolution']
+            # If we haven't seen this resolution, or if this new one has audio while the old one didn't
+            if res not in unique_formats:
+                unique_formats[res] = f
+            elif f['has_audio'] and not unique_formats[res]['has_audio']:
+                unique_formats[res] = f
+        
+        # Sort formats by resolution (descending)
+        sorted_formats = sorted(unique_formats.values(), 
+                              key=lambda x: int(str(x['resolution']).split('p')[0]) if 'p' in str(x['resolution']) else 0, 
+                              reverse=True)
+        
+        return jsonify({
+            'title': info.get('title'),
+            'thumbnail': info.get('thumbnail'),
+            'duration': info.get('duration'),
+            'channel': info.get('uploader'),
+            'formats': sorted_formats
+        })
             
     except Exception as e:
         return jsonify({'error': str(e)}), 500
