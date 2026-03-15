@@ -47,8 +47,18 @@ def get_video_info():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             # extract_info with download=False just fetches metadata
             info = ydl.extract_info(url, download=False)
-            
-            # Filter and organize formats (we want video with audio or ability to merge)
+    except Exception as e:
+        # If impersonation fails, try without it
+        if "Impersonate target" in str(e):
+            print("Impersonation failed, falling back to basic headers")
+            ydl_opts.pop('impersonate', None)
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+        else:
+            raise e
+    
+    try:
+        # Filter and organize formats (we want video with audio or ability to merge)
             formats = []
             
             # Basic formats that already have both video and audio
@@ -150,8 +160,20 @@ def download_video_thread(url, format_id, audio_only, download_id):
                 'progress_hooks': [my_hook]
             }
             
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+        except Exception as e:
+            if "Impersonate target" in str(e):
+                print("Impersonation failed during download, falling back")
+                ydl_opts.pop('impersonate', None)
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info = ydl.extract_info(url, download=True)
+            else:
+                raise e
+                
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl: # This is a bit redundant now but ensures metadata extraction if needed
+            info = ydl.extract_info(url, download=False) # Get fresh info for filename
             filename = ydl.prepare_filename(info)
             
             if audio_only:
