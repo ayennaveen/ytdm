@@ -76,6 +76,7 @@ header {
 .gradient-text {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: 700;
 }
@@ -84,6 +85,47 @@ header {
     color: var(--text-muted);
     font-size: 1.1rem;
     font-weight: 300;
+}
+
+.status-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+}
+
+.status-badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-badge.online { border-color: var(--success); color: var(--success); }
+.status-badge.online .dot { background: var(--success); box-shadow: 0 0 10px var(--success); }
+
+.status-badge.offline { border-color: var(--danger); color: var(--danger); }
+.status-badge.offline .dot { background: var(--danger); }
+
+.status-badge.checking { border-color: var(--primary); color: var(--primary); }
+.status-badge.checking .dot { background: var(--primary); animation: pulse 1s infinite; }
+
+@keyframes pulse {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
 }
 
 /* Step 1: Input Section */
@@ -227,6 +269,7 @@ input[type="url"]::placeholder {
 .truncate-2-lines {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

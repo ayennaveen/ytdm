@@ -41,6 +41,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const dlAudioBtn = document.getElementById('download-audio-btn');
     const progressSection = document.getElementById('download-progress');
     const successSection = document.getElementById('download-success');
+    const serverStatus = document.getElementById('server-status');
+
+    // Health Check
+    async function checkHealth() {
+        if (!serverStatus) return;
+        try {
+            const res = await fetch('/health');
+            if (res.ok) {
+                serverStatus.className = 'status-badge online';
+                serverStatus.querySelector('.status-text').textContent = 'Online';
+            } else {
+                throw new Error();
+            }
+        } catch (e) {
+            serverStatus.className = 'status-badge offline';
+            serverStatus.querySelector('.status-text').textContent = 'Connection Error';
+        }
+    }
+
+    checkHealth();
+    // Re-check every 30 seconds
+    setInterval(checkHealth, 30000);
 
     let currentVideoData = null;
     let selectedFormatId = null;

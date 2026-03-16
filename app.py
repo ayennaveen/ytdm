@@ -13,6 +13,26 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 # Store active downloads
 active_downloads = {}
 
+def cleanup_old_files():
+    """Delete files in DOWNLOAD_DIR older than 2 hours."""
+    import time
+    while True:
+        try:
+            current_time = time.time()
+            for filename in os.listdir(DOWNLOAD_DIR):
+                file_path = os.path.join(DOWNLOAD_DIR, filename)
+                if os.path.isfile(file_path):
+                    if os.stat(file_path).st_mtime < current_time - 7200: # 2 hours
+                        os.remove(file_path)
+                        print(f"Cleaned up old file: {filename}")
+        except Exception as e:
+            print(f"Cleanup error: {e}")
+        time.sleep(3600) # Run every hour
+
+# Start cleanup thread
+cleanup_thread = threading.Thread(target=cleanup_old_files, daemon=True)
+cleanup_thread.start()
+
 # Common yt-dlp options for better bot bypass
 COMMON_OPTS = {
     'cookiefile': 'cookies.txt',
@@ -29,6 +49,10 @@ def serve_index():
 @app.route('/static/<path:path>')
 def serve_static(path):
     return send_from_directory('static', path)
+
+@app.route('/health')
+def health_check():
+    return jsonify({'status': 'online', 'storage': 'active'}), 200
 
 @app.route('/api/info', methods=['POST'])
 def get_video_info():
@@ -49,14 +73,11 @@ def get_video_info():
                 # extract_info with download=False just fetches metadata
                 info = ydl.extract_info(url, download=False)
         except Exception as e:
-            # If impersonation fails, try without it
-            if "Impersonate target" in str(e):
-                print("Impersonation failed, falling back to basic headers")
-                ydl_opts.pop('impersonate', None)
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    info = ydl.extract_info(url, download=False)
-            else:
-                raise e
+            # Fallback for any error during impersonation or other early failures
+            print(f"Initial extraction failed: {str(e)}")
+            ydl_opts.pop('impersonate', None)
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
 
         # Filter and organize formats (we want video with audio or ability to merge)
         formats = []
@@ -107,7 +128,13 @@ def get_video_info():
         })
             
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        error_msg = str(e)
+        if not error_msg:
+            error_msg = "An unknown error occurred during metadata extraction."
+        print(f"Final error: {error_msg}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': error_msg}), 500
 
 import uuid
 
