@@ -36,10 +36,11 @@ cleanup_thread.start()
 # Common yt-dlp options for better bot bypass
 COMMON_OPTS = {
     'cookiefile': 'cookies.txt',
+    'impersonate': 'chrome',
     'nocheckcertificate': True,
     'quiet': True,
     'no_warnings': True,
-    'extractor_args': {'youtube': ['player_client=android,web']},
+    'extractor_args': {'youtube': ['player_client=tv,web']},
 }
 
 @app.route('/')
