@@ -168,7 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error(error);
             errorMsg.classList.remove('hidden');
-            errorMsg.querySelector('span').textContent = error.message;
+            const errorTextEl = document.getElementById('error-text');
+            if (errorTextEl) errorTextEl.value = error.message;
         } finally {
             fetchBtn.classList.remove('hidden');
             loader.classList.add('hidden');
@@ -291,4 +292,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dlVideoBtn.addEventListener('click', () => triggerDownload(false));
     dlAudioBtn.addEventListener('click', () => triggerDownload(true));
+
+    // Handle Copy Error Button
+    const copyErrorBtn = document.getElementById('copy-error-btn');
+    if (copyErrorBtn) {
+        copyErrorBtn.addEventListener('click', () => {
+            const errText = document.getElementById('error-text').value;
+            if (!errText) return;
+            navigator.clipboard.writeText(errText).then(() => {
+                copyErrorBtn.innerHTML = '<i class="fa-solid fa-check" style="color:var(--success)"></i>';
+                setTimeout(() => {
+                    copyErrorBtn.innerHTML = '<i class="fa-regular fa-copy"></i>';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        });
+    }
 });

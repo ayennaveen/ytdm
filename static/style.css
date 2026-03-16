@@ -197,9 +197,58 @@ input[type="url"]::placeholder {
     border-radius: 8px;
     margin-top: 15px;
     display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.error-header {
+    display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.error-body {
+    display: flex;
+    position: relative;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    border: 1px solid var(--glass-border);
+}
+
+.error-body textarea {
+    width: 100%;
+    height: 80px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 10px 40px 10px 10px;
+    resize: none;
+    font-family: monospace;
+    font-size: 0.85rem;
+    outline: none;
+}
+
+#copy-error-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--text-main);
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#copy-error-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 /* Step 2: Info Section */

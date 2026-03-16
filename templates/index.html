@@ -42,8 +42,16 @@
                     </div>
                 </div>
                 <div id="error-message" class="error-msg hidden">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                    <span>Invalid URL or error fetching.</span>
+                    <div class="error-header">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>Error Occurred</span>
+                    </div>
+                    <div class="error-body">
+                        <textarea id="error-text" readonly></textarea>
+                        <button id="copy-error-btn" title="Copy Error">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
                 </div>
             </section>
 
