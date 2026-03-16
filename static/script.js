@@ -260,10 +260,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else if (progData.status === 'completed') {
                             clearInterval(pollInterval);
                             
-                            // Success UI
+                            // Success UI & Auto Download
                             progressSection.classList.add('hidden');
                             successSection.classList.remove('hidden');
-                            successSection.querySelector('p').innerHTML = `Saved as:<br><code>${progData.file_name}</code><br>in your downloads folder.`;
+                            successSection.querySelector('p').innerHTML = `File is ready: <code>${progData.file_name}</code><br>Download started! Check your device notifications.`;
+                            
+                            // Trigger actual file download
+                            const a = document.createElement('a');
+                            a.href = `/api/serve/${downloadId}`;
+                            a.download = progData.file_name || 'download';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
                             
                             // Reset UI states
                             dlVideoBtn.disabled = false;

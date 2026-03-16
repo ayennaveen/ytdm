@@ -257,6 +257,18 @@ def get_progress(download_id):
         return jsonify({'error': 'Not found'}), 404
     return jsonify(data)
 
+@app.route('/api/serve/<download_id>')
+def serve_download(download_id):
+    data = active_downloads.get(download_id)
+    if not data or data.get('status') != 'completed':
+        return jsonify({'error': 'File not found or not ready'}), 404
+    
+    file_name = data.get('file_name')
+    if not file_name:
+        return jsonify({'error': 'File name missing'}), 404
+        
+    return send_from_directory(DOWNLOAD_DIR, file_name, as_attachment=True)
+
 
 if __name__ == '__main__':
     print(f"Server starting. Downloads will be saved to: {DOWNLOAD_DIR}")
