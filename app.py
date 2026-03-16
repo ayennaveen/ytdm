@@ -36,7 +36,6 @@ cleanup_thread.start()
 # Common yt-dlp options for better bot bypass
 COMMON_OPTS = {
     'cookiefile': 'cookies.txt',
-    'impersonate': 'chrome',
     'nocheckcertificate': True,
     'quiet': True,
     'no_warnings': True,
@@ -69,16 +68,9 @@ def get_video_info():
     }
     
     try:
-        try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                # extract_info with download=False just fetches metadata
-                info = ydl.extract_info(url, download=False)
-        except Exception as e:
-            # Fallback for any error during impersonation or other early failures
-            print(f"Initial extraction failed: {str(e)}")
-            ydl_opts.pop('impersonate', None)
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(url, download=False)
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            # extract_info with download=False just fetches metadata
+            info = ydl.extract_info(url, download=False)
 
         # Filter and organize formats (we want video with audio or ability to merge)
         formats = []
@@ -188,17 +180,8 @@ def download_video_thread(url, format_id, audio_only, download_id):
                 'progress_hooks': [my_hook]
             }
             
-        try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(url, download=True)
-        except Exception as e:
-            if "Impersonate target" in str(e):
-                print("Impersonation failed during download, falling back")
-                ydl_opts.pop('impersonate', None)
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    info = ydl.extract_info(url, download=True)
-            else:
-                raise e
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
                 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl: # This is a bit redundant now but ensures metadata extraction if needed
             info = ydl.extract_info(url, download=False) # Get fresh info for filename
