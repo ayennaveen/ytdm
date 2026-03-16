@@ -55,6 +55,17 @@ def serve_static(path):
 def health_check():
     return jsonify({'status': 'online', 'storage': 'active'}), 200
 
+@app.route('/logs')
+def get_logs():
+    # Helper to retrieve recent server logs if running in a container
+    import subprocess
+    try:
+        # Depending on host, this might need tweaking. On render, you often just rely on the dashboard.
+        # But we can try to read standard app logs or provide instructions.
+        return jsonify({"message": "View logs directly in your Render Dashboard > Logs tab for container outputs."}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/info', methods=['POST'])
 def get_video_info():
     data = request.json
@@ -73,15 +84,15 @@ def get_video_info():
             # extract_info with download=False just fetches metadata
             info = ydl.extract_info(url, download=False)
 
-        # Filter and organize formats (we want video with audio or ability to merge)
         formats = []
+        raw_formats = info.get('formats', [])
         
         # Basic formats that already have both video and audio
-        for f in info.get('formats', []):
+        for f in raw_formats:
             # Look for formats that have both video and audio (progressive) or are high quality video to be merged later
             if f.get('vcodec') != 'none' and f.get('ext') in ['mp4', 'webm']:
-                height = f.get('height', 0)
-                fps = f.get('fps', '')
+                height = f.get('height') or 0
+                fps = f.get('fps') or 0
                 
                 if height:
                     format_name = f"{height}p"
@@ -107,6 +118,18 @@ def get_video_info():
                 unique_formats[res] = f
             elif f['has_audio'] and not unique_formats[res]['has_audio']:
                 unique_formats[res] = f
+                
+        # Handle cases where formats might be entirely empty due to age restriction etc
+        if not unique_formats and info.get('url'):
+            unique_formats['source'] = {
+                'id': info.get('format_id', 'best'),
+                'ext': info.get('ext', 'mp4'),
+                'resolution': 'Source',
+                'filesize': 0,
+                'vcodec': info.get('vcodec'),
+                'acodec': info.get('acodec'),
+                'has_audio': True
+            }
         
         # Sort formats by resolution (descending)
         sorted_formats = sorted(unique_formats.values(), 
@@ -122,12 +145,12 @@ def get_video_info():
         })
             
     except Exception as e:
-        error_msg = str(e)
-        if not error_msg:
-            error_msg = "An unknown error occurred during metadata extraction."
-        print(f"Final error: {error_msg}")
         import traceback
         traceback.print_exc()
+        error_msg = str(e) if str(e) else repr(e)
+        if not error_msg or error_msg.strip() == "":
+            error_msg = "An unknown error occurred during metadata extraction."
+        print(f"Final error: {error_msg}")
         return jsonify({'error': error_msg}), 500
 
 import uuid
