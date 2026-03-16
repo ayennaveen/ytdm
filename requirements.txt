@@ -1,5 +1,4 @@
 Flask
 Flask-Cors
 yt-dlp[default]
-curl_cffi==0.5.10
 gunicorn
